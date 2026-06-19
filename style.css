@@ -94,6 +94,17 @@ h4 {
     background-color: #f0f0f0;
 }
 
+#deleteButton {
+    text-align: center;
+    padding: 10px;
+    border: 1px solid black;
+    cursor: pointer;
+}
+
+#deleteButton:hover {
+    background: #f2f2f2;
+}
+
 /* month bar */
 #monthBar {
     width: 75vw;

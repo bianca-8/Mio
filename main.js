@@ -10,6 +10,7 @@ const modal = document.getElementById("eventPlace");
 const eventInput = document.getElementById("eventInput");
 const saveButton = document.getElementById("saveButton");
 const cancelButton = document.getElementById("cancelButton");
+const deleteButton = document.getElementById("deleteButton");
 
 // calendar
 const months = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -46,6 +47,17 @@ function renderCalendar(year, month) {
                     eventDiv.classList.add("event");
                     eventDiv.textContent = event.title;
 
+                    eventDiv.addEventListener("click", (e) => {
+                        e.stopPropagation();
+
+                        editingEvent = event;
+
+                        eventInput.value = event.title;
+
+                        deleteButton.style.display = "block";
+                        modal.style.display = "flex";
+                    });
+                    
                     day.appendChild(eventDiv);
                 }
             });
@@ -66,6 +78,10 @@ function renderCalendar(year, month) {
             day.addEventListener("mouseup", () => {
                 isDragging = false;
 
+                editingEvent = null;
+                deleteButton.style.display = "none";
+
+                eventInput.value = "";
                 modal.style.display = "flex";
             });
         }
@@ -119,15 +135,24 @@ saveButton.addEventListener("click", () => {
 
     if (text === "") return;
 
-    const start = startDate < endDate ? startDate : endDate;
-    const end = startDate < endDate ? endDate : startDate;
+    if (editingEvent) {
 
-    events.push({
-        id: nextEventId++,
-        title: text,
-        start,
-        end
-    });
+        editingEvent.title = text;
+
+        editingEvent = null;
+
+    } else {
+
+        const start = startDate < endDate ? startDate : endDate;
+        const end = startDate < endDate ? endDate : startDate;
+
+        events.push({
+            id: nextEventId++,
+            title: text,
+            start,
+            end
+        });
+    }
 
     eventInput.value = "";
     modal.style.display = "none";
@@ -137,10 +162,27 @@ saveButton.addEventListener("click", () => {
 });
 
 cancelButton.addEventListener("click", () => {
+    editingEvent = null;
     eventInput.value = "";
     modal.style.display = "none";
 
     clearSelection();
+});
+
+deleteButton.addEventListener("click", () => {
+
+    if (!editingEvent) return;
+
+    events = events.filter(event => event.id !== editingEvent.id);
+
+    editingEvent = null;
+    deleteButton.style.display = "none";
+
+    eventInput.value = "";
+    modal.style.display = "none";
+
+    clearSelection();
+    renderCalendar(currentYear, currentMonth);
 });
 
 modal.addEventListener("click", (event) => {
