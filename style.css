@@ -37,6 +37,7 @@ h4 {
 .dayNumber {
     font-weight: bold;
     margin-bottom: 4px;
+    user-select: none;
 }
 
 #weekdays {
@@ -129,6 +130,7 @@ h4 {
     border: 1px solid black;
     cursor: pointer;
     padding: 10px 15px;
+    user-select: none;
 }
 
 .selected {

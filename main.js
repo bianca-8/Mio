@@ -1,8 +1,10 @@
 const calendar = document.getElementById("calendar");
-let selectedDay = null;
 let isDragging = false;
 let startDate = null;
 let endDate = null;
+let editingEvent = null;
+let events = []; // {id, title, start, end}
+let nextEventId = 1;
 
 const modal = document.getElementById("eventPlace");
 const eventInput = document.getElementById("eventInput");
@@ -27,37 +29,46 @@ function renderCalendar(year, month) {
         const dayNumber = i - firstDay + 1;
 
         if (dayNumber > 0 && dayNumber <= daysInMonth) {
+
+            const currentDate = new Date(year, month, dayNumber);
+
+            day.dataset.date = currentDate.toISOString();
+
             const number = document.createElement("div");
             number.classList.add("dayNumber");
             number.textContent = dayNumber;
-
             day.appendChild(number);
 
-            day.addEventListener("click", () => {
-                selectedDay = day;
-                eventInput.value = "";
+            events.forEach(event => {
+                if (currentDate >= event.start && currentDate <= event.end) {
+
+                    const eventDiv = document.createElement("div");
+                    eventDiv.classList.add("event");
+                    eventDiv.textContent = event.title;
+
+                    day.appendChild(eventDiv);
+                }
+            });
+
+            day.addEventListener("mousedown", () => {
+                isDragging = true;
+                startDate = new Date(year, month, dayNumber);
+                endDate = new Date(year, month, dayNumber);
+            });
+
+            day.addEventListener("mouseenter", () => {
+                if (!isDragging) return;
+
+                endDate = new Date(year, month, dayNumber);
+                highlightSelection();
+            });
+
+            day.addEventListener("mouseup", () => {
+                isDragging = false;
+
                 modal.style.display = "flex";
             });
         }
-
-        day.addEventListener("mousedown", () => {
-            isDragging = true;
-            startDate = new Date(year, month, dayNumber);
-            endDate = new Date(year, month, dayNumber);
-        });
-
-        day.addEventListener("mouseenter", () => {
-            if (!isDragging) return;
-
-            endDay = day;
-            highlightSelection();
-        });
-
-        day.addEventListener("mouseup", () => {
-            isDragging = false;
-
-            modal.style.display = "flex";
-        });
 
         day.dataset.index = i;
 
@@ -68,24 +79,26 @@ function renderCalendar(year, month) {
 function highlightSelection() {
     document.querySelectorAll(".day").forEach(day => {
         day.classList.remove("selected");
-    });
 
-    const start = Math.min(
-        Number(startDay.dataset.index),
-        Number(endDay.dataset.index)
-    );
+        if (!day.dataset.date) return;
 
-    const end = Math.max(
-        Number(startDay.dataset.index),
-        Number(endDay.dataset.index)
-    );
+        const date = new Date(day.dataset.date);
 
-    document.querySelectorAll(".day").forEach(day => {
-        const index = Number(day.dataset.index);
+        const start = startDate < endDate ? startDate : endDate;
+        const end = startDate < endDate ? endDate : startDate;
 
-        if (index >= start && index <= end) {
+        if (date >= start && date <= end) {
             day.classList.add("selected");
         }
+    });
+}
+
+function clearSelection() {
+    startDate = null;
+    endDate = null;
+
+    document.querySelectorAll(".day").forEach(day => {
+        day.classList.remove("selected");
     });
 }
 
@@ -98,38 +111,44 @@ const today = new Date();
 let currentYear = today.getFullYear();
 let currentMonth = today.getMonth();
 
-renderCalendar(today.getFullYear(), today.getMonth());
+renderCalendar(currentYear, currentMonth);
 
 // button
-const button = document.getElementById("saveButton");
-
 saveButton.addEventListener("click", () => {
     const text = eventInput.value.trim();
 
     if (text === "") return;
 
-    const eventDiv = document.createElement("div");
-    eventDiv.classList.add("event");
-    eventDiv.textContent = text;
+    const start = startDate < endDate ? startDate : endDate;
+    const end = startDate < endDate ? endDate : startDate;
 
-    selectedDays.forEach(day => {
-        const eventDiv = document.createElement("div");
-        eventDiv.classList.add("event");
-        eventDiv.textContent = text;
-
-        day.appendChild(eventDiv);
+    events.push({
+        id: nextEventId++,
+        title: text,
+        start,
+        end
     });
 
+    eventInput.value = "";
     modal.style.display = "none";
+
+    clearSelection();
+    renderCalendar(currentYear, currentMonth);
 });
 
 cancelButton.addEventListener("click", () => {
+    eventInput.value = "";
     modal.style.display = "none";
+
+    clearSelection();
 });
 
 modal.addEventListener("click", (event) => {
     if (event.target === modal) {
+        eventInput.value = "";
         modal.style.display = "none";
+
+        clearSelection();
     }
 });
 
