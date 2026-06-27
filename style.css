@@ -8,6 +8,10 @@ h1 {
     margin-bottom: 10px;
 }
 
+h3 {
+    text-align: center;
+}
+
 h4 {
     text-align: center;
     margin-top: 0px;
@@ -146,4 +150,58 @@ h4 {
 
 .selected {
     background-color: #d0e8ff;
+}
+
+#shareButton {
+    border: 1px solid black;
+    cursor: pointer;
+    padding: 10px 15px;
+    user-select: none;
+}
+
+#sharePlacePopup {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+}
+
+#shareBox {
+    background: white;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 400px;
+}
+
+#shareLinkBox {
+    display: flex;
+    gap: 8px;
+}
+
+#shareLinkInput {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid black;
+    font-size: 13px;
+}
+
+#copyButton {
+    padding: 10px;
+    border: 1px solid black;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+#shareCloseButton {
+    padding: 10px;
+    border: 1px solid black;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
 }

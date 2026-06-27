@@ -127,6 +127,7 @@ const today = new Date();
 let currentYear = today.getFullYear();
 let currentMonth = today.getMonth();
 
+loadFromURL();
 renderCalendar(currentYear, currentMonth);
 
 // button
@@ -225,3 +226,56 @@ document.getElementById("currMonth").addEventListener("click", () => {
 
     renderCalendar(currentYear, currentMonth);
 });
+
+// share
+const sharePopup = document.getElementById("sharePlacePopup");
+const shareLinkInput = document.getElementById("shareLinkInput");
+
+function saveToURL() {
+    const data = events.map(e => ({
+        id: e.id,
+        title: e.title,
+        start: e.start.toISOString(),
+        end: e.end.toISOString()
+    }));
+    const encoded = btoa(JSON.stringify(data));
+    const url = `${location.origin}${location.pathname}?events=${encoded}`;
+
+    shareLinkInput.value = url;
+    sharePopup.style.display = "flex";
+}
+
+document.getElementById("copyButton").addEventListener("click", () => {
+    navigator.clipboard.writeText(shareLinkInput.value);
+    document.getElementById("copyButton").textContent = "Copied!";
+    setTimeout(() => {
+        document.getElementById("copyButton").textContent = "Copy";
+    }, 2000);
+});
+
+document.getElementById("shareCloseButton").addEventListener("click", () => {
+    sharePopup.style.display = "none";
+});
+
+sharePopup.addEventListener("click", (e) => {
+    if (e.target === sharePopup) sharePopup.style.display = "none";
+});
+
+document.getElementById("shareButton").addEventListener("click", saveToURL);
+
+function loadFromURL() {
+  const params = new URLSearchParams(location.search);
+  const encoded = params.get("events");
+  if (!encoded) return;
+  try {
+    const data = JSON.parse(atob(encoded));
+    events = data.map(e => ({
+      ...e,
+      start: new Date(e.start),
+      end: new Date(e.end)
+    }));
+    nextEventId = Math.max(...events.map(e => e.id)) + 1;
+  } catch {}
+}
+
+document.getElementById("shareButton").addEventListener("click", saveToURL);
